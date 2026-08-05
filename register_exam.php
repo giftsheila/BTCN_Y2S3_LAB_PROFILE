@@ -17,7 +17,35 @@ if (!isset($_GET['id'])) {
 
 $exam_id = $_GET['id'];
 
-// Check if the student has already registered
+/*
+|--------------------------------------------------------------------------
+| CHECK PAYMENT STATUS
+|--------------------------------------------------------------------------
+*/
+
+$payment = mysqli_query($conn,
+    "SELECT * FROM payments
+     WHERE reg_no='$reg_no'
+     AND payment_status='verified'
+     ORDER BY payment_id DESC
+     LIMIT 1");
+
+if (mysqli_num_rows($payment) == 0) {
+
+    echo "<script>
+            alert('You must complete and verify your payment before registering for an exam.');
+            window.location='make_payment.php';
+          </script>";
+
+    exit();
+}
+
+/*
+|--------------------------------------------------------------------------
+| CHECK IF ALREADY REGISTERED
+|--------------------------------------------------------------------------
+*/
+
 $check = mysqli_query($conn,
     "SELECT * FROM exam_registration
      WHERE reg_no='$reg_no'
@@ -33,7 +61,12 @@ if (mysqli_num_rows($check) > 0) {
     exit();
 }
 
-// Register the student
+/*
+|--------------------------------------------------------------------------
+| REGISTER STUDENT
+|--------------------------------------------------------------------------
+*/
+
 $sql = "INSERT INTO exam_registration
         (reg_no, exam_id, registration_status)
         VALUES
